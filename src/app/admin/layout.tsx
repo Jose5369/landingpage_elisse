@@ -50,6 +50,11 @@ function LoginForm({ onSuccess }: { onSuccess: (token: string) => void }) {
   const [showPassword, setShowPassword] = useState(false);
   const [success, setSuccess] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setTimeout(() => setMounted(true), 100);
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -68,7 +73,7 @@ function LoginForm({ onSuccess }: { onSuccess: (token: string) => void }) {
       }
       localStorage.setItem('admin_token', data.token);
       setSuccess(true);
-      setTimeout(() => onSuccess(data.token), 800);
+      setTimeout(() => onSuccess(data.token), 1200);
     } catch {
       setError('Error de conexión con el servidor');
     } finally {
@@ -77,230 +82,447 @@ function LoginForm({ onSuccess }: { onSuccess: (token: string) => void }) {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4"
-      style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)' }}
-    >
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -left-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute top-1/2 -right-20 w-96 h-96 bg-indigo-500/8 rounded-full blur-3xl"
-          style={{ animation: 'pulse 4s ease-in-out infinite alternate' }} />
-        <div className="absolute bottom-0 left-1/3 w-72 h-72 bg-cyan-500/8 rounded-full blur-3xl"
-          style={{ animation: 'pulse 5s ease-in-out infinite alternate-reverse' }} />
+    <div className="login-page min-h-screen relative overflow-hidden flex items-center justify-center p-4">
+      {/* === ANIMATED BACKGROUND === */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Orbiting gradient blobs */}
+        <div className="orb orb-1" />
+        <div className="orb orb-2" />
+        <div className="orb orb-3" />
 
-        {/* Grid pattern */}
-        <div className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: 'linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)',
-            backgroundSize: '60px 60px'
-          }}
-        />
+        {/* Animated grid */}
+        <div className="grid-bg" />
 
-        {/* Floating particles */}
-        {[...Array(6)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 bg-blue-400/30 rounded-full"
-            style={{
-              top: `${15 + i * 15}%`,
-              left: `${10 + i * 16}%`,
-              animation: `float ${3 + i * 0.7}s ease-in-out infinite alternate`,
-              animationDelay: `${i * 0.5}s`,
-            }}
-          />
+        {/* Rising particles */}
+        {[...Array(20)].map((_, i) => (
+          <div key={i} className="particle" style={{
+            left: `${5 + (i * 4.7) % 90}%`,
+            animationDuration: `${6 + (i % 5) * 2}s`,
+            animationDelay: `${(i * 0.8) % 10}s`,
+            width: `${2 + (i % 3)}px`,
+            height: `${2 + (i % 3)}px`,
+            opacity: 0.15 + (i % 4) * 0.1,
+          }} />
         ))}
+
+        {/* Horizontal scanning line */}
+        <div className="scan-line" />
       </div>
 
-      {/* Login card */}
-      <div
-        className={`relative w-full max-w-md transition-all duration-700 ${
-          success ? 'scale-95 opacity-0 translate-y-4' : 'scale-100 opacity-100 translate-y-0'
-        }`}
-        style={{ animation: 'slideUp 0.6s ease-out' }}
-      >
-        {/* Glow behind card */}
-        <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 via-indigo-500/20 to-cyan-500/20 rounded-3xl blur-xl opacity-60" />
+      {/* === LOGIN CARD === */}
+      <div className={`relative w-full max-w-md z-10 transition-all duration-1000 ${
+        mounted ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-10 scale-95'
+      } ${success ? 'login-success' : ''}`}>
 
-        <div className="relative bg-slate-900/80 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden">
-          {/* Top accent bar */}
-          <div className="h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-cyan-500" />
+        {/* Animated border glow */}
+        <div className="card-glow" />
+
+        {/* Rotating border */}
+        <div className="card-border-wrap">
+          <div className="card-border-rotate" />
+        </div>
+
+        <div className="relative bg-[#0c1222]/90 backdrop-blur-2xl rounded-2xl shadow-2xl overflow-hidden border border-white/[0.08]">
+          {/* Animated top bar */}
+          <div className="h-[2px] relative overflow-hidden">
+            <div className="topbar-gradient" />
+          </div>
 
           <div className="p-10">
-            {/* Logo */}
+            {/* Logo with pulse ring */}
             <div className="text-center mb-10">
-              <div
-                className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-5 relative"
-                style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)' }}
-              >
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 to-transparent" />
-                <ShieldCheck size={30} className="text-white relative z-10" />
+              <div className="relative inline-flex items-center justify-center">
+                <div className="logo-ring logo-ring-1" />
+                <div className="logo-ring logo-ring-2" />
+                <div className="logo-icon">
+                  <ShieldCheck size={28} className="text-white relative z-10" />
+                </div>
               </div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">ELISE SYSTEM</h1>
-              <p className="text-slate-400 text-sm mt-2">Panel de Administración</p>
+              <h1 className={`text-2xl font-bold text-white tracking-tight mt-6 transition-all duration-700 delay-300 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'}`}>
+                ELISE SYSTEM
+              </h1>
+              <p className={`text-slate-400 text-sm mt-1.5 transition-all duration-700 delay-500 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'}`}>
+                Panel de Administración
+              </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Error message */}
+              {/* Error */}
               {error && (
-                <div
-                  className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 text-red-300 text-sm rounded-xl px-4 py-3.5 backdrop-blur-sm"
-                  style={{ animation: 'shake 0.5s ease-in-out' }}
-                >
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0">
-                    <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" />
-                    <path d="M8 5v3.5M8 10.5v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                  </svg>
+                <div className="error-shake flex items-center gap-3 bg-red-500/10 border border-red-500/20 text-red-300 text-sm rounded-xl px-4 py-3.5">
+                  <span className="material-symbols-outlined text-base">error</span>
                   {error}
                 </div>
               )}
 
-              {/* Email field */}
-              <div className="relative group">
+              {/* Email */}
+              <div className={`transition-all duration-700 delay-[400ms] ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
                 <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
                   Correo electrónico
                 </label>
-                <div className={`relative rounded-xl transition-all duration-300 ${
-                  focusedField === 'email'
-                    ? 'ring-2 ring-blue-500/50 shadow-lg shadow-blue-500/10'
-                    : ''
-                }`}>
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className={`transition-colors duration-300 ${focusedField === 'email' ? 'text-blue-400' : 'text-slate-500'}`}>
-                      <rect x="2" y="4" width="20" height="16" rx="3" stroke="currentColor" strokeWidth="1.5" />
-                      <path d="M2 7l8.165 5.715a3 3 0 003.67 0L22 7" stroke="currentColor" strokeWidth="1.5" />
-                    </svg>
+                <div className={`input-wrap ${focusedField === 'email' ? 'focused' : ''}`}>
+                  <div className="input-glow" />
+                  <div className="relative">
+                    <span className={`material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-lg transition-all duration-300 ${focusedField === 'email' ? 'text-blue-400 scale-110' : 'text-slate-500'}`}>
+                      mail
+                    </span>
+                    <input
+                      type="email" value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      onFocus={() => setFocusedField('email')}
+                      onBlur={() => setFocusedField(null)}
+                      required autoComplete="email"
+                      className="w-full bg-white/[0.04] border border-white/[0.08] text-white placeholder-slate-600 rounded-xl pl-12 pr-4 py-3.5 text-sm focus:outline-none transition-all duration-300"
+                      placeholder="admin@elisesystem.com"
+                    />
                   </div>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    onFocus={() => setFocusedField('email')}
-                    onBlur={() => setFocusedField(null)}
-                    required
-                    autoComplete="email"
-                    className="w-full bg-white/5 border border-white/10 text-white placeholder-slate-500 rounded-xl pl-12 pr-4 py-3.5 text-sm focus:outline-none focus:border-blue-500/50 transition-all duration-300"
-                    placeholder="admin@elisesystem.com"
-                  />
                 </div>
               </div>
 
-              {/* Password field */}
-              <div className="relative group">
+              {/* Password */}
+              <div className={`transition-all duration-700 delay-[550ms] ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
                 <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
                   Contraseña
                 </label>
-                <div className={`relative rounded-xl transition-all duration-300 ${
-                  focusedField === 'password'
-                    ? 'ring-2 ring-blue-500/50 shadow-lg shadow-blue-500/10'
-                    : ''
-                }`}>
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className={`transition-colors duration-300 ${focusedField === 'password' ? 'text-blue-400' : 'text-slate-500'}`}>
-                      <rect x="3" y="11" width="18" height="11" rx="3" stroke="currentColor" strokeWidth="1.5" />
-                      <path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                      <circle cx="12" cy="16" r="1.5" fill="currentColor" />
-                    </svg>
+                <div className={`input-wrap ${focusedField === 'password' ? 'focused' : ''}`}>
+                  <div className="input-glow" />
+                  <div className="relative">
+                    <span className={`material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-lg transition-all duration-300 ${focusedField === 'password' ? 'text-blue-400 scale-110' : 'text-slate-500'}`}>
+                      lock
+                    </span>
+                    <input
+                      type={showPassword ? 'text' : 'password'} value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      onFocus={() => setFocusedField('password')}
+                      onBlur={() => setFocusedField(null)}
+                      required autoComplete="current-password"
+                      className="w-full bg-white/[0.04] border border-white/[0.08] text-white placeholder-slate-600 rounded-xl pl-12 pr-12 py-3.5 text-sm focus:outline-none transition-all duration-300"
+                      placeholder="••••••••"
+                    />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors">
+                      <span className="material-symbols-outlined text-lg">{showPassword ? 'visibility' : 'visibility_off'}</span>
+                    </button>
                   </div>
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    onFocus={() => setFocusedField('password')}
-                    onBlur={() => setFocusedField(null)}
-                    required
-                    autoComplete="current-password"
-                    className="w-full bg-white/5 border border-white/10 text-white placeholder-slate-500 rounded-xl pl-12 pr-12 py-3.5 text-sm focus:outline-none focus:border-blue-500/50 transition-all duration-300"
-                    placeholder="••••••••"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-500 hover:text-slate-300 transition-colors"
-                  >
-                    {showPassword ? (
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12z" stroke="currentColor" strokeWidth="1.5"/><circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.5"/></svg>
-                    ) : (
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-10-7-10-7a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 10 7 10 7a18.5 18.5 0 01-2.16 3.19M3 3l18 18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
-                    )}
-                  </button>
                 </div>
               </div>
 
-              {/* Submit button */}
-              <button
-                type="submit"
-                disabled={loading || success}
-                className="relative w-full overflow-hidden font-semibold py-4 rounded-xl text-sm text-white transition-all duration-300 disabled:cursor-not-allowed group mt-2"
-                style={{
-                  background: loading || success
-                    ? 'linear-gradient(135deg, #3b82f6, #6366f1)'
-                    : 'linear-gradient(135deg, #3b82f6, #6366f1)',
-                }}
-              >
-                {/* Hover shimmer effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-
-                <span className="relative z-10 flex items-center justify-center gap-2">
-                  {loading ? (
-                    <>
-                      <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25" />
-                        <path d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" fill="currentColor" className="opacity-75" />
-                      </svg>
-                      Verificando credenciales...
-                    </>
-                  ) : success ? (
-                    <>
-                      <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                      Acceso concedido
-                    </>
-                  ) : (
-                    <>
-                      Iniciar sesión
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="group-hover:translate-x-0.5 transition-transform">
-                        <path d="M3 8h10M10 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </>
-                  )}
-                </span>
-              </button>
+              {/* Submit */}
+              <div className={`transition-all duration-700 delay-[700ms] ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                <button type="submit" disabled={loading || success}
+                  className="login-btn relative w-full overflow-hidden font-semibold py-4 rounded-xl text-sm text-white transition-all duration-300 disabled:cursor-not-allowed group mt-1">
+                  <div className="btn-shimmer" />
+                  <span className="relative z-10 flex items-center justify-center gap-2.5">
+                    {loading ? (
+                      <>
+                        <span className="loading-dots flex gap-1">
+                          <span className="dot" /><span className="dot" /><span className="dot" />
+                        </span>
+                        Verificando...
+                      </>
+                    ) : success ? (
+                      <>
+                        <span className="checkmark">
+                          <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+                            <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="check-path"/>
+                          </svg>
+                        </span>
+                        Bienvenido
+                      </>
+                    ) : (
+                      <>
+                        Acceder al panel
+                        <span className="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform duration-300">arrow_forward</span>
+                      </>
+                    )}
+                  </span>
+                </button>
+              </div>
             </form>
 
             {/* Footer */}
-            <div className="mt-8 pt-6 border-t border-white/5 text-center">
-              <p className="text-slate-500 text-xs">
-                Acceso restringido a personal autorizado
-              </p>
-              <div className="flex items-center justify-center gap-1.5 mt-2 text-slate-600 text-xs">
-                <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
-                  <rect x="2" y="7" width="12" height="8" rx="2" stroke="currentColor" strokeWidth="1.2" />
-                  <path d="M5 7V5a3 3 0 016 0v2" stroke="currentColor" strokeWidth="1.2" />
-                </svg>
-                Conexión segura SSL/TLS
+            <div className={`mt-8 pt-6 border-t border-white/5 text-center transition-all duration-700 delay-[850ms] ${mounted ? 'opacity-100' : 'opacity-0'}`}>
+              <div className="flex items-center justify-center gap-2 text-slate-500 text-xs">
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="ssl-dot" />
+                  Conexión cifrada SSL/TLS
+                </span>
+                <span className="text-slate-700">•</span>
+                <span>v2.0</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* CSS Animations */}
+      {/* === ALL ANIMATIONS === */}
       <style jsx>{`
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(30px) scale(0.97); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
+        .login-page {
+          background: #070b14;
+        }
+
+        /* --- Orbs --- */
+        .orb {
+          position: absolute;
+          border-radius: 50%;
+          filter: blur(80px);
+        }
+        .orb-1 {
+          width: 500px; height: 500px;
+          background: radial-gradient(circle, rgba(59,130,246,0.15), transparent 70%);
+          animation: orbit1 20s ease-in-out infinite;
+        }
+        .orb-2 {
+          width: 400px; height: 400px;
+          background: radial-gradient(circle, rgba(139,92,246,0.12), transparent 70%);
+          animation: orbit2 25s ease-in-out infinite;
+        }
+        .orb-3 {
+          width: 350px; height: 350px;
+          background: radial-gradient(circle, rgba(6,182,212,0.1), transparent 70%);
+          animation: orbit3 18s ease-in-out infinite;
+        }
+
+        @keyframes orbit1 {
+          0%   { top: -20%; left: -10%; }
+          25%  { top: 10%;  left: 60%; }
+          50%  { top: 60%;  left: 70%; }
+          75%  { top: 50%;  left: -5%; }
+          100% { top: -20%; left: -10%; }
+        }
+        @keyframes orbit2 {
+          0%   { top: 70%;  right: -15%; }
+          33%  { top: -10%; right: 30%; }
+          66%  { top: 40%;  right: 60%; }
+          100% { top: 70%;  right: -15%; }
+        }
+        @keyframes orbit3 {
+          0%   { bottom: -10%; left: 30%; }
+          50%  { bottom: 50%;  left: -10%; }
+          100% { bottom: -10%; left: 30%; }
+        }
+
+        /* --- Grid --- */
+        .grid-bg {
+          position: absolute; inset: 0;
+          background-image:
+            linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
+          background-size: 50px 50px;
+          animation: gridMove 20s linear infinite;
+        }
+        @keyframes gridMove {
+          from { transform: translate(0, 0); }
+          to   { transform: translate(50px, 50px); }
+        }
+
+        /* --- Particles --- */
+        .particle {
+          position: absolute;
+          bottom: -10px;
+          background: #3b82f6;
+          border-radius: 50%;
+          animation: rise linear infinite;
+        }
+        @keyframes rise {
+          0%   { transform: translateY(0) scale(1); opacity: 0; }
+          10%  { opacity: 0.4; }
+          90%  { opacity: 0.1; }
+          100% { transform: translateY(-100vh) scale(0.5); opacity: 0; }
+        }
+
+        /* --- Scan line --- */
+        .scan-line {
+          position: absolute;
+          left: 0; right: 0;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(59,130,246,0.15), transparent);
+          animation: scan 4s ease-in-out infinite;
+        }
+        @keyframes scan {
+          0%   { top: -2%; opacity: 0; }
+          20%  { opacity: 1; }
+          80%  { opacity: 1; }
+          100% { top: 102%; opacity: 0; }
+        }
+
+        /* --- Card glow --- */
+        .card-glow {
+          position: absolute;
+          inset: -2px;
+          border-radius: 18px;
+          background: conic-gradient(from var(--angle, 0deg), transparent 60%, rgba(59,130,246,0.3), rgba(139,92,246,0.3), transparent 100%);
+          animation: glowRotate 4s linear infinite;
+          filter: blur(15px);
+          opacity: 0.5;
+        }
+        @keyframes glowRotate {
+          to { --angle: 360deg; }
+        }
+        @property --angle {
+          syntax: '<angle>';
+          initial-value: 0deg;
+          inherits: false;
+        }
+
+        /* --- Card border rotate --- */
+        .card-border-wrap {
+          position: absolute;
+          inset: -1px;
+          border-radius: 17px;
+          overflow: hidden;
+          z-index: 0;
+        }
+        .card-border-rotate {
+          position: absolute;
+          inset: -50%;
+          background: conic-gradient(from 0deg, transparent, #3b82f6, #8b5cf6, #06b6d4, transparent);
+          animation: borderSpin 6s linear infinite;
+        }
+        @keyframes borderSpin {
+          to { transform: rotate(360deg); }
+        }
+
+        /* --- Top bar --- */
+        .topbar-gradient {
+          position: absolute;
+          inset: 0;
+          width: 300%;
+          background: linear-gradient(90deg, #3b82f6, #8b5cf6, #06b6d4, #3b82f6);
+          animation: topbarSlide 3s linear infinite;
+        }
+        @keyframes topbarSlide {
+          from { transform: translateX(-33.33%); }
+          to   { transform: translateX(0); }
+        }
+
+        /* --- Logo rings --- */
+        .logo-icon {
+          position: relative; z-index: 2;
+          width: 60px; height: 60px;
+          display: flex; align-items: center; justify-content: center;
+          border-radius: 16px;
+          background: linear-gradient(135deg, #3b82f6, #6366f1);
+        }
+        .logo-ring {
+          position: absolute;
+          border: 2px solid rgba(59,130,246,0.2);
+          border-radius: 20px;
+        }
+        .logo-ring-1 {
+          inset: -8px;
+          animation: ringPulse 2s ease-in-out infinite;
+        }
+        .logo-ring-2 {
+          inset: -16px;
+          animation: ringPulse 2s ease-in-out infinite 0.5s;
+          border-color: rgba(59,130,246,0.1);
+        }
+        @keyframes ringPulse {
+          0%, 100% { transform: scale(1); opacity: 0.5; }
+          50%      { transform: scale(1.08); opacity: 0; }
+        }
+
+        /* --- Input focus --- */
+        .input-wrap {
+          position: relative;
+          border-radius: 12px;
+        }
+        .input-wrap .input-glow {
+          position: absolute; inset: -1px;
+          border-radius: 13px;
+          opacity: 0;
+          background: linear-gradient(135deg, rgba(59,130,246,0.4), rgba(139,92,246,0.4));
+          filter: blur(8px);
+          transition: opacity 0.4s;
+        }
+        .input-wrap.focused .input-glow {
+          opacity: 1;
+        }
+        .input-wrap.focused input {
+          border-color: rgba(59,130,246,0.5);
+          background: rgba(255,255,255,0.06);
+        }
+
+        /* --- Button --- */
+        .login-btn {
+          background: linear-gradient(135deg, #3b82f6, #6366f1, #8b5cf6);
+          background-size: 200% 200%;
+          animation: btnGradient 3s ease infinite;
+        }
+        @keyframes btnGradient {
+          0%   { background-position: 0% 50%; }
+          50%  { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        .btn-shimmer {
+          position: absolute; inset: 0;
+          background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.15) 50%, transparent 60%);
+          animation: shimmer 2.5s ease-in-out infinite;
+        }
+        @keyframes shimmer {
+          0%   { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+
+        /* --- Loading dots --- */
+        .loading-dots .dot {
+          width: 6px; height: 6px;
+          background: white;
+          border-radius: 50%;
+          display: inline-block;
+          animation: dotBounce 1.4s ease-in-out infinite;
+        }
+        .loading-dots .dot:nth-child(2) { animation-delay: 0.16s; }
+        .loading-dots .dot:nth-child(3) { animation-delay: 0.32s; }
+        @keyframes dotBounce {
+          0%, 80%, 100% { transform: scale(0.4); opacity: 0.3; }
+          40% { transform: scale(1); opacity: 1; }
+        }
+
+        /* --- Checkmark draw --- */
+        .check-path {
+          stroke-dasharray: 30;
+          stroke-dashoffset: 30;
+          animation: drawCheck 0.5s ease forwards;
+        }
+        @keyframes drawCheck {
+          to { stroke-dashoffset: 0; }
+        }
+
+        /* --- SSL dot --- */
+        .ssl-dot {
+          width: 6px; height: 6px;
+          background: #22c55e;
+          border-radius: 50%;
+          display: inline-block;
+          animation: sslPulse 2s ease-in-out infinite;
+        }
+        @keyframes sslPulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
+          50% { box-shadow: 0 0 0 6px rgba(34,197,94,0); }
+        }
+
+        /* --- Error shake --- */
+        .error-shake {
+          animation: shake 0.6s ease;
         }
         @keyframes shake {
           0%, 100% { transform: translateX(0); }
-          20% { transform: translateX(-8px); }
-          40% { transform: translateX(8px); }
-          60% { transform: translateX(-4px); }
-          80% { transform: translateX(4px); }
+          15% { transform: translateX(-10px); }
+          30% { transform: translateX(10px); }
+          45% { transform: translateX(-6px); }
+          60% { transform: translateX(6px); }
+          75% { transform: translateX(-2px); }
+          90% { transform: translateX(2px); }
         }
-        @keyframes float {
-          from { transform: translateY(0px); }
-          to { transform: translateY(-20px); }
+
+        /* --- Success exit --- */
+        .login-success {
+          animation: successExit 0.8s ease forwards 0.4s;
+        }
+        @keyframes successExit {
+          to { opacity: 0; transform: scale(0.92) translateY(-20px); filter: blur(4px); }
         }
       `}</style>
     </div>
