@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" fill="none">
+  <defs>
+    <linearGradient id="eliseGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#007fff"/>
+      <stop offset="100%" stop-color="#0052cc"/>
+    </linearGradient>
+  </defs>
+  <!-- Icon: stylized E -->
+  <rect x="8" y="16" width="56" height="48" rx="12" fill="url(#eliseGrad)"/>
+  <rect x="20" y="26" width="32" height="5" rx="2.5" fill="white"/>
+  <rect x="20" y="37.5" width="24" height="5" rx="2.5" fill="white"/>
+  <rect x="20" y="49" width="32" height="5" rx="2.5" fill="white"/>
+  <!-- Text: ELISE SYSTEM -->
+  <text x="76" y="46" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="24" font-weight="800" fill="#0f172a" letter-spacing="-0.02em">ELISE</text>
+  <text x="164" y="46" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="24" font-weight="800" fill="url(#eliseGrad)" letter-spacing="-0.02em">SYSTEM</text>
+  <!-- Tagline -->
+  <text x="76" y="62" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="9" font-weight="500" fill="#64748b" letter-spacing="0.15em">SISTEMA POS INTELIGENTE</text>
+</svg>

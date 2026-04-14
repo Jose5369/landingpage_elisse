@@ -189,10 +189,10 @@ function seedDefaultData(db: Database.Database): void {
 
   // ── Branding settings — always seed if missing (safe to run on existing DBs) ─
   const brandingDefaults: [string, string, string][] = [
-    ['logo_url',       '/logos/logo-elise.png',  'branding'],
-    ['logo_white_url', '/logos/logo-white.png',  'branding'],
-    ['favicon_url',    '/logos/icono-elise.png', 'branding'],
-    ['logo_height',    '40',                      'branding'],
+    ['logo_url',       '/logos/logo-elise.svg',  'branding'],
+    ['logo_white_url', '/logos/logo-white.svg',  'branding'],
+    ['favicon_url',    '/logos/icono-elise.svg', 'branding'],
+    ['logo_height',    '44',                      'branding'],
   ];
   db.transaction(() => {
     for (const [key, value, category] of brandingDefaults) {
