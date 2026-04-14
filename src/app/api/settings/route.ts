@@ -13,6 +13,9 @@ const PUBLIC_KEYS = [
   'meta_title',
   'meta_description',
   'favicon_url',
+  'logo_url',
+  'logo_white_url',
+  'logo_height',
 ];
 
 export async function GET() {

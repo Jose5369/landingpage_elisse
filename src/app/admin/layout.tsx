@@ -19,6 +19,7 @@ import {
   LogOut,
   ChevronRight,
   ShieldCheck,
+  Users,
 } from 'lucide-react';
 
 // ------------------------------------------------------------------ types
@@ -39,6 +40,8 @@ const navItems = [
   { href: '/admin/industries', label: 'Industrias', icon: Building2 },
   { href: '/admin/pages', label: 'Páginas', icon: FileText },
   { href: '/admin/social', label: 'Redes Sociales', icon: Share2 },
+  { href: '/admin/users', label: 'Usuarios', icon: Users },
+  { href: '/admin/roles', label: 'Roles', icon: ShieldCheck },
 ];
 
 // ------------------------------------------------------------------ login form
@@ -51,9 +54,16 @@ function LoginForm({ onSuccess }: { onSuccess: (token: string) => void }) {
   const [success, setSuccess] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [logoUrl, setLogoUrl] = useState('');
 
   useEffect(() => {
     setTimeout(() => setMounted(true), 100);
+    fetch('/api/settings')
+      .then((r) => r.json())
+      .then((data: Record<string, string>) => {
+        if (data.logo_url) setLogoUrl(data.logo_url);
+      })
+      .catch(() => {/* keep ShieldCheck fallback */});
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -134,9 +144,18 @@ function LoginForm({ onSuccess }: { onSuccess: (token: string) => void }) {
               <div className="relative inline-flex items-center justify-center">
                 <div className="logo-ring logo-ring-1" />
                 <div className="logo-ring logo-ring-2" />
-                <div className="logo-icon">
-                  <ShieldCheck size={28} className="text-white relative z-10" />
-                </div>
+                {logoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={logoUrl}
+                    alt="Logo"
+                    className="w-14 h-14 object-contain relative z-10"
+                  />
+                ) : (
+                  <div className="logo-icon">
+                    <ShieldCheck size={28} className="text-white relative z-10" />
+                  </div>
+                )}
               </div>
               <h1 className={`text-2xl font-bold text-white tracking-tight mt-6 transition-all duration-700 delay-300 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'}`}>
                 ELISE SYSTEM
@@ -559,12 +578,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [token, setToken] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarLogoUrl, setSidebarLogoUrl] = useState('');
   const router = useRouter();
 
   useEffect(() => {
     const stored = localStorage.getItem('admin_token');
     setToken(stored);
     setMounted(true);
+    fetch('/api/settings')
+      .then((r) => r.json())
+      .then((data: Record<string, string>) => {
+        if (data.logo_url) setSidebarLogoUrl(data.logo_url);
+      })
+      .catch(() => {/* keep ShieldCheck fallback */});
   }, []);
 
   function handleLogout() {
@@ -606,8 +632,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="flex items-center justify-between px-4 py-4 border-b border-slate-700">
           {!sidebarCollapsed && (
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shrink-0">
-                <ShieldCheck size={16} className="text-slate-800" />
+              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
+                {sidebarLogoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={sidebarLogoUrl}
+                    alt="Logo"
+                    className="w-6 h-6 object-contain"
+                  />
+                ) : (
+                  <ShieldCheck size={16} className="text-slate-800" />
+                )}
               </div>
               <span className="font-bold text-white text-sm truncate">Admin</span>
             </div>

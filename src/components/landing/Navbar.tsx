@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 const navLinks = [
@@ -11,8 +11,27 @@ const navLinks = [
   { label: "Testimonios", href: "#testimonials" },
 ];
 
+interface SiteSettings {
+  logo_url?: string;
+  site_name?: string;
+  logo_height?: string;
+}
+
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [settings, setSettings] = useState<SiteSettings>({});
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((r) => r.json())
+      .then((data: SiteSettings) => setSettings(data))
+      .catch(() => {
+        // fallback: keep empty settings, icon fallback will be used
+      });
+  }, []);
+
+  const logoHeight = Number(settings.logo_height) || 40;
+  const siteName = settings.site_name || "ELISE SYSTEM";
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200/60 dark:border-gray-800/60 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md">
@@ -20,15 +39,26 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm"
-              style={{ backgroundColor: "var(--primary)" }}
-            >
-              E
-            </div>
-            <span className="font-bold text-xl text-gray-900 dark:text-white tracking-tight">
-              ELISE<span style={{ color: "var(--primary)" }}>SYSTEM</span>
-            </span>
+            {settings.logo_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={settings.logo_url}
+                alt={siteName}
+                style={{ height: logoHeight, objectFit: "contain" }}
+              />
+            ) : (
+              <>
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm"
+                  style={{ backgroundColor: "var(--primary)" }}
+                >
+                  E
+                </div>
+                <span className="font-bold text-xl text-gray-900 dark:text-white tracking-tight">
+                  ELISE<span style={{ color: "var(--primary)" }}>SYSTEM</span>
+                </span>
+              </>
+            )}
           </Link>
 
           {/* Desktop navigation */}

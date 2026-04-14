@@ -96,6 +96,15 @@ function initializeTables(db: Database.Database): void {
       activo   INTEGER NOT NULL DEFAULT 1
     );
 
+    CREATE TABLE IF NOT EXISTS roles (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      name        TEXT UNIQUE NOT NULL,
+      description TEXT,
+      permissions TEXT NOT NULL DEFAULT '[]',
+      is_system   INTEGER NOT NULL DEFAULT 0,
+      created_at  TEXT NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS admin_users (
       id         INTEGER PRIMARY KEY AUTOINCREMENT,
       email      TEXT UNIQUE NOT NULL,
@@ -105,21 +114,101 @@ function initializeTables(db: Database.Database): void {
     );
   `);
 
+  // Add new columns to admin_users if they don't exist yet (table already existed)
+  const alterColumns: [string, string][] = [
+    ['role_id',    'INTEGER REFERENCES roles(id)'],
+    ['active',     'INTEGER NOT NULL DEFAULT 1'],
+    ['last_login', 'TEXT'],
+    ['updated_at', 'TEXT'],
+  ];
+
+  for (const [col, def] of alterColumns) {
+    try {
+      db.exec(`ALTER TABLE admin_users ADD COLUMN ${col} ${def}`);
+    } catch {
+      // Column already exists – that's fine
+    }
+  }
+
   seedDefaultData(db);
+  seedRoles(db);
+}
+
+function seedRoles(db: Database.Database): void {
+  const now = new Date().toISOString();
+
+  const rolesCount = (db.prepare('SELECT COUNT(*) as c FROM roles').get() as { c: number }).c;
+  if (rolesCount === 0) {
+    const insertRole = db.prepare(
+      'INSERT INTO roles (name, description, permissions, is_system, created_at) VALUES (?, ?, ?, ?, ?)'
+    );
+
+    const defaultRoles: [string, string, string, number][] = [
+      [
+        'super_admin',
+        'Acceso total al sistema',
+        JSON.stringify(['*']),
+        1,
+      ],
+      [
+        'admin',
+        'Administrador con acceso a la mayoría de secciones',
+        JSON.stringify(['settings.*', 'menu.*', 'sections.*', 'features.*', 'benefits.*', 'industries.*', 'pages.*', 'social.*', 'users.read']),
+        1,
+      ],
+      [
+        'editor',
+        'Editor de contenido',
+        JSON.stringify(['pages.*', 'features.read', 'benefits.read', 'industries.read']),
+        1,
+      ],
+      [
+        'viewer',
+        'Solo lectura',
+        JSON.stringify(['*.read']),
+        1,
+      ],
+    ];
+
+    const seedRolesTransaction = db.transaction(() => {
+      for (const [name, description, permissions, is_system] of defaultRoles) {
+        insertRole.run(name, description, permissions, is_system, now);
+      }
+    });
+    seedRolesTransaction();
+  }
+
+  // Assign role_id = 1 (super_admin) to existing admin users if not set
+  db.prepare("UPDATE admin_users SET role_id = 1 WHERE role_id IS NULL").run();
 }
 
 function seedDefaultData(db: Database.Database): void {
-  // Only seed if tables are empty
-  const settingsCount = (db.prepare('SELECT COUNT(*) as c FROM settings').get() as { c: number }).c;
-  if (settingsCount > 0) return;
-
-  const now = new Date().toISOString();
-
-  // ── Settings ──────────────────────────────────────────────────────────────
   const insertSetting = db.prepare(
     'INSERT OR IGNORE INTO settings (key, value, category) VALUES (?, ?, ?)'
   );
 
+  // ── Branding settings — always seed if missing (safe to run on existing DBs) ─
+  const brandingDefaults: [string, string, string][] = [
+    ['logo_url',       '/logos/logo-elise.png',  'branding'],
+    ['logo_white_url', '/logos/logo-white.png',  'branding'],
+    ['favicon_url',    '/logos/icono-elise.png', 'branding'],
+    ['logo_height',    '40',                      'branding'],
+  ];
+  db.transaction(() => {
+    for (const [key, value, category] of brandingDefaults) {
+      insertSetting.run(key, value, category);
+    }
+  })();
+
+  // Only seed remaining data if full defaults have not been inserted yet
+  const alreadySeeded = db
+    .prepare("SELECT COUNT(*) as c FROM settings WHERE key = 'site_name'")
+    .get() as { c: number };
+  if (alreadySeeded.c > 0) return;
+
+  const now = new Date().toISOString();
+
+  // ── Settings ──────────────────────────────────────────────────────────────
   const settings: [string, string, string][] = [
     ['site_name',            'ELISE SYSTEM',                                    'general'],
     ['primary_color',        '#007fff',                                         'general'],
@@ -127,14 +216,14 @@ function seedDefaultData(db: Database.Database): void {
     ['logo_icon',            'point_of_sale',                                   'general'],
     ['favicon_url',          '',                                                'general'],
     ['og_image_url',         '',                                                'general'],
-    ['meta_title',           'ELISE SYSTEM – Sistema POS e Inventario',        'seo'],
-    ['meta_description',     'La plataforma líder para gestión de ventas, inventario y facturación para pequeñas y medianas empresas.', 'seo'],
-    ['meta_keywords',        'POS, inventario, facturación, ventas, PYME',     'seo'],
-    ['announcement_text',    'Moderniza tu negocio con ELISE SYSTEM – ¡Prueba gratis 30 días!', 'announcement'],
+    ['meta_title',           'ELISE SYSTEM \u2013 Sistema POS e Inventario',   'seo'],
+    ['meta_description',     'La plataforma l\u00EDder para gesti\u00F3n de ventas, inventario y facturaci\u00F3n para peque\u00F1as y medianas empresas.', 'seo'],
+    ['meta_keywords',        'POS, inventario, facturaci\u00F3n, ventas, PYME', 'seo'],
+    ['announcement_text',    'Moderniza tu negocio con ELISE SYSTEM \u2013 \u00A1Prueba gratis 30 d\u00EDas!', 'announcement'],
     ['announcement_active',  '1',                                               'announcement'],
     ['whatsapp_number',      '',                                                'contact'],
     ['whatsapp_active',      '1',                                               'contact'],
-    ['footer_description',   'La plataforma líder para gestión de ventas, inventario y facturación para pequeñas y medianas empresas.',  'footer'],
+    ['footer_description',   'La plataforma l\u00EDder para gesti\u00F3n de ventas, inventario y facturaci\u00F3n para peque\u00F1as y medianas empresas.', 'footer'],
     ['system_url',           'https://app.elisesystem.com',                    'integrations'],
   ];
 
@@ -172,13 +261,13 @@ function seedDefaultData(db: Database.Database): void {
       'INSERT INTO features (icon, title, description, orden, activo) VALUES (?, ?, ?, ?, 1)'
     );
     const features: [string, string, string, number][] = [
-      ['point_of_sale', 'POS Rápido', 'Procesa ventas en segundos con interfaz intuitiva, múltiples métodos de pago y cierre de caja automatizado.', 1],
-      ['inventory_2',   'Inventario en Tiempo Real', 'Control total de stock, alertas de mínimos, movimientos y ajustes de inventario al instante.', 2],
-      ['category',      'Gestión de Productos', 'Crea catálogos ilimitados con variantes, precios por lista, imágenes y códigos de barras.', 3],
-      ['people',        'Clientes y CxC', 'Administra tu cartera de clientes, créditos, estado de cuenta y cobranzas en un solo lugar.', 4],
-      ['local_shipping','Compras y Proveedores', 'Gestiona órdenes de compra, recepciones, cuentas por pagar y relación con proveedores.', 5],
-      ['bar_chart',     'Reportes y Analítica', 'Dashboard en tiempo real con ventas, utilidades, productos más vendidos y desempeño por vendedor.', 6],
-      ['receipt_long',  'Facturación Electrónica', 'Emite facturas, notas de crédito y débito con cumplimiento fiscal, envío por correo y almacenamiento en la nube.', 7],
+      ['point_of_sale', 'POS R\u00E1pido', 'Procesa ventas en segundos con interfaz intuitiva, m\u00FAltiples m\u00E9todos de pago y cierre de caja automatizado.', 1],
+      ['inventory_2',   'Inventario en Tiempo Real', 'Control total de stock, alertas de m\u00EDnimos, movimientos y ajustes de inventario al instante.', 2],
+      ['category',      'Gesti\u00F3n de Productos', 'Crea cat\u00E1logos ilimitados con variantes, precios por lista, im\u00E1genes y c\u00F3digos de barras.', 3],
+      ['people',        'Clientes y CxC', 'Administra tu cartera de clientes, cr\u00E9ditos, estado de cuenta y cobranzas en un solo lugar.', 4],
+      ['local_shipping','Compras y Proveedores', 'Gestiona \u00F3rdenes de compra, recepciones, cuentas por pagar y relaci\u00F3n con proveedores.', 5],
+      ['bar_chart',     'Reportes y Anal\u00EDtica', 'Dashboard en tiempo real con ventas, utilidades, productos m\u00E1s vendidos y desempe\u00F1o por vendedor.', 6],
+      ['receipt_long',  'Facturaci\u00F3n Electr\u00F3nica', 'Emite facturas, notas de cr\u00E9dito y d\u00E9bito con cumplimiento fiscal, env\u00EDo por correo y almacenamiento en la nube.', 7],
       ['business',      'Multiempresa', 'Administra varias empresas o sucursales desde una sola cuenta con permisos diferenciados.', 8],
     ];
     const seedFeatures = db.transaction(() => {
@@ -196,12 +285,12 @@ function seedDefaultData(db: Database.Database): void {
       'INSERT INTO benefits (icon, title, description, orden, activo) VALUES (?, ?, ?, ?, 1)'
     );
     const benefits: [string, string, string, number][] = [
-      ['bolt',          'Implementación Inmediata', 'Comienza a vender el mismo día. Sin instalaciones complejas, sin necesidad de técnicos.', 1],
-      ['cloud_sync',    'Siempre Actualizado',      'Actualizaciones automáticas sin costo adicional. Siempre tendrás la versión más reciente.', 2],
-      ['lock',          'Seguridad Garantizada',    'Tus datos protegidos con cifrado de grado bancario y respaldos automáticos en la nube.', 3],
-      ['support_agent', 'Soporte Experto',           'Equipo de soporte disponible para ayudarte a sacar el máximo provecho del sistema.', 4],
-      ['devices',       'Multiplataforma',           'Accede desde cualquier dispositivo: computador, tablet o celular, sin apps adicionales.', 5],
-      ['trending_up',   'Escala con Tu Negocio',    'Desde emprendedores hasta empresas medianas, ELISE crece contigo sin cambiar de plataforma.', 6],
+      ['bolt',          'Implementaci\u00F3n Inmediata', 'Comienza a vender el mismo d\u00EDa. Sin instalaciones complejas, sin necesidad de t\u00E9cnicos.', 1],
+      ['cloud_sync',    'Siempre Actualizado',           'Actualizaciones autom\u00E1ticas sin costo adicional. Siempre tendr\u00E1s la versi\u00F3n m\u00E1s reciente.', 2],
+      ['lock',          'Seguridad Garantizada',         'Tus datos protegidos con cifrado de grado bancario y respaldos autom\u00E1ticos en la nube.', 3],
+      ['support_agent', 'Soporte Experto',               'Equipo de soporte disponible para ayudarte a sacar el m\u00E1ximo provecho del sistema.', 4],
+      ['devices',       'Multiplataforma',               'Accede desde cualquier dispositivo: computador, tablet o celular, sin apps adicionales.', 5],
+      ['trending_up',   'Escala con Tu Negocio',         'Desde emprendedores hasta empresas medianas, ELISE crece contigo sin cambiar de plataforma.', 6],
     ];
     const seedBenefits = db.transaction(() => {
       for (const [icon, title, description, orden] of benefits) {
@@ -218,11 +307,11 @@ function seedDefaultData(db: Database.Database): void {
       'INSERT INTO industries (icon, name, orden, activo) VALUES (?, ?, ?, 1)'
     );
     const industries: [string, string, number][] = [
-      ['storefront',       'Tiendas y Retail',         1],
-      ['restaurant',       'Restaurantes y Cafeterías', 2],
-      ['medical_services', 'Salud y Farmacias',         3],
-      ['hardware',         'Ferreterías',               4],
-      ['spa',              'Belleza y Estética',        5],
+      ['storefront',       'Tiendas y Retail',          1],
+      ['restaurant',       'Restaurantes y Caf\u00E9ter\u00EDas', 2],
+      ['medical_services', 'Salud y Farmacias',          3],
+      ['hardware',         'Ferreter\u00EDas',           4],
+      ['spa',              'Belleza y Est\u00E9tica',    5],
     ];
     const seedIndustries = db.transaction(() => {
       for (const [icon, name, orden] of industries) {
@@ -260,13 +349,13 @@ function seedDefaultData(db: Database.Database): void {
       'INSERT INTO sections (section_key, title, subtitle, content, activo, orden) VALUES (?, ?, ?, ?, 1, ?)'
     );
     const sections: [string, string, string, string, number][] = [
-      ['hero',          'El Sistema POS que Impulsa tu Negocio', 'Todo lo que necesitas para gestionar ventas, inventario y clientes en una sola plataforma.', '', 1],
-      ['trust_bar',     'Con la confianza de cientos de empresas', '', '', 2],
-      ['showcase',      'Diseñado para la Velocidad y la Claridad', 'Cada pantalla pensada para que tú y tu equipo trabajen sin fricciones.', '', 3],
-      ['whatsapp_cta',  '¿Tienes preguntas? Hablemos por WhatsApp', 'Nuestro equipo está listo para ayudarte a elegir el plan ideal para tu negocio.', '', 4],
-      ['pricing',       'Planes y Precios', 'Elige el plan que mejor se adapta a tu negocio. Sin sorpresas, sin letra pequeña.', '', 5],
-      ['testimonials',  'Lo que dicen nuestros clientes', 'Negocios como el tuyo ya están creciendo con ELISE SYSTEM.', '', 6],
-      ['final_cta',     '¿Listo para transformar tu negocio?', 'Únete a cientos de empresas que ya confían en ELISE SYSTEM para gestionar sus operaciones.', '', 7],
+      ['hero',         'El Sistema POS que Impulsa tu Negocio', 'Todo lo que necesitas para gestionar ventas, inventario y clientes en una sola plataforma.', '', 1],
+      ['trust_bar',    'Con la confianza de cientos de empresas', '', '', 2],
+      ['showcase',     'Dise\u00F1ado para la Velocidad y la Claridad', 'Cada pantalla pensada para que t\u00FA y tu equipo trabajen sin fricciones.', '', 3],
+      ['whatsapp_cta', '\u00BFTienes preguntas? Hablemos por WhatsApp', 'Nuestro equipo est\u00E1 listo para ayudarte a elegir el plan ideal para tu negocio.', '', 4],
+      ['pricing',      'Planes y Precios', 'Elige el plan que mejor se adapta a tu negocio. Sin sorpresas, sin letra peque\u00F1a.', '', 5],
+      ['testimonials', 'Lo que dicen nuestros clientes', 'Negocios como el tuyo ya est\u00E1n creciendo con ELISE SYSTEM.', '', 6],
+      ['final_cta',    '\u00BFListo para transformar tu negocio?', '\u00DAnete a cientos de empresas que ya conf\u00EDan en ELISE SYSTEM para gestionar sus operaciones.', '', 7],
     ];
     const seedSections = db.transaction(() => {
       for (const [section_key, title, subtitle, content, orden] of sections) {
@@ -294,25 +383,25 @@ function seedDefaultData(db: Database.Database): void {
     `);
     const defaultPages: [string, string, string, string, string][] = [
       [
-        'Política de Privacidad',
+        'Pol\u00EDtica de Privacidad',
         'politica-privacidad',
-        '<h2>Política de Privacidad</h2><p>En ELISE SYSTEM nos comprometemos a proteger tu información personal. Este documento describe cómo recopilamos, usamos y protegemos tus datos.</p><p><em>Contenido pendiente de redacción.</em></p>',
-        'Política de Privacidad – ELISE SYSTEM',
-        'Conoce cómo ELISE SYSTEM protege y gestiona tu información personal.',
+        '<h2>Pol\u00EDtica de Privacidad</h2><p>En ELISE SYSTEM nos comprometemos a proteger tu informaci\u00F3n personal.</p>',
+        'Pol\u00EDtica de Privacidad \u2013 ELISE SYSTEM',
+        'Conoce c\u00F3mo ELISE SYSTEM protege y gestiona tu informaci\u00F3n personal.',
       ],
       [
-        'Términos de Servicio',
+        'T\u00E9rminos de Servicio',
         'terminos-servicio',
-        '<h2>Términos de Servicio</h2><p>Al utilizar ELISE SYSTEM aceptas los presentes términos y condiciones. Por favor léelos detenidamente.</p><p><em>Contenido pendiente de redacción.</em></p>',
-        'Términos de Servicio – ELISE SYSTEM',
-        'Lee los términos y condiciones de uso de la plataforma ELISE SYSTEM.',
+        '<h2>T\u00E9rminos de Servicio</h2><p>Al utilizar ELISE SYSTEM aceptas los presentes t\u00E9rminos y condiciones.</p>',
+        'T\u00E9rminos de Servicio \u2013 ELISE SYSTEM',
+        'Lee los t\u00E9rminos y condiciones de uso de la plataforma ELISE SYSTEM.',
       ],
       [
-        'Política de Devoluciones',
+        'Pol\u00EDtica de Devoluciones',
         'politica-devoluciones',
-        '<h2>Política de Devoluciones</h2><p>Describe las condiciones bajo las cuales se aceptan devoluciones y reembolsos de suscripciones.</p><p><em>Contenido pendiente de redacción.</em></p>',
-        'Política de Devoluciones – ELISE SYSTEM',
-        'Conoce la política de devoluciones y reembolsos de ELISE SYSTEM.',
+        '<h2>Pol\u00EDtica de Devoluciones</h2><p>Describe las condiciones bajo las cuales se aceptan devoluciones y reembolsos.</p>',
+        'Pol\u00EDtica de Devoluciones \u2013 ELISE SYSTEM',
+        'Conoce la pol\u00EDtica de devoluciones y reembolsos de ELISE SYSTEM.',
       ],
     ];
     const seedPages = db.transaction(() => {

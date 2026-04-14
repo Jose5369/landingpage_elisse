@@ -1,4 +1,14 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
+
+interface SiteSettings {
+  logo_url?: string;
+  logo_white_url?: string;
+  site_name?: string;
+  logo_height?: string;
+}
 
 const footerLinks = {
   platform: {
@@ -34,6 +44,21 @@ const footerLinks = {
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const [settings, setSettings] = useState<SiteSettings>({});
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((r) => r.json())
+      .then((data: SiteSettings) => setSettings(data))
+      .catch(() => {
+        // fallback: keep empty settings
+      });
+  }, []);
+
+  // Prefer white logo on dark footer; fall back to regular logo
+  const footerLogoUrl = settings.logo_white_url || settings.logo_url || "";
+  const siteName = settings.site_name || "ELISE SYSTEM";
+  const logoHeight = Number(settings.logo_height) || 40;
 
   return (
     <footer className="bg-gray-900 dark:bg-gray-950 border-t border-gray-800">
@@ -42,15 +67,26 @@ export default function Footer() {
           {/* Brand column */}
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm"
-                style={{ backgroundColor: "var(--primary)" }}
-              >
-                E
-              </div>
-              <span className="font-bold text-xl text-white tracking-tight">
-                ELISE<span style={{ color: "var(--primary)" }}>SYSTEM</span>
-              </span>
+              {footerLogoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={footerLogoUrl}
+                  alt={siteName}
+                  style={{ height: logoHeight, objectFit: "contain" }}
+                />
+              ) : (
+                <>
+                  <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm"
+                    style={{ backgroundColor: "var(--primary)" }}
+                  >
+                    E
+                  </div>
+                  <span className="font-bold text-xl text-white tracking-tight">
+                    ELISE<span style={{ color: "var(--primary)" }}>SYSTEM</span>
+                  </span>
+                </>
+              )}
             </Link>
             <p className="text-sm text-gray-400 leading-relaxed mb-5">
               El sistema POS inteligente diseñado para impulsar el crecimiento
