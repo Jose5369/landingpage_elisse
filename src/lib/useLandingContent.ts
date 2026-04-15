@@ -7,6 +7,9 @@ export interface LandingSection {
   title: string | null;
   subtitle: string | null;
   content: string | null;
+  badge: string | null;
+  extra_json: string | null;
+  orden: number;
 }
 
 export interface LandingFeature {

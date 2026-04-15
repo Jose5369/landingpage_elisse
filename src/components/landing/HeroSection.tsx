@@ -1,6 +1,9 @@
 'use client';
 
+import { useRef } from 'react';
 import { useSection } from '@/lib/useLandingContent';
+import Editable from '@/components/editor/Editable';
+import { useEditMode } from '@/lib/editMode';
 
 const DEFAULT_TITLE = 'El sistema POS inteligente que transforma tu negocio';
 const DEFAULT_SUBTITLE =
@@ -27,12 +30,39 @@ function renderTitle(title: string) {
 
 export default function HeroSection() {
   const section = useSection('hero');
+  const { isAdmin, isEditMode, recordChange, pendingChanges } = useEditMode();
+  const primaryRef = useRef<HTMLSpanElement>(null);
+  const secondaryRef = useRef<HTMLSpanElement>(null);
 
   const title = section?.title || DEFAULT_TITLE;
   const subtitle = section?.subtitle || DEFAULT_SUBTITLE;
-  const ctas = (section?.content || DEFAULT_CTAS).split('|').map((s) => s.trim());
+
+  // Read content from pending change first, then from section, then fallback
+  const pendingContent = pendingChanges.find(
+    (c) => c.resource === 'section' && c.key === 'hero' && c.field === 'content'
+  )?.value;
+  const ctas = (pendingContent ?? section?.content ?? DEFAULT_CTAS).split('|').map((s) => s.trim());
   const ctaPrimary = ctas[0] || 'Probar gratis';
   const ctaSecondary = ctas[1] || 'Ver Precios';
+
+  const editable = isAdmin && isEditMode;
+  const editableCls = editable
+    ? 'ring-1 ring-white/50 rounded outline-none cursor-text'
+    : '';
+
+  function handleCtaBlur() {
+    const newPrimary = primaryRef.current?.innerText.trim() || ctaPrimary;
+    const newSecondary = secondaryRef.current?.innerText.trim() || ctaSecondary;
+    const newContent = `${newPrimary}|${newSecondary}`;
+    if (newContent !== (section?.content ?? DEFAULT_CTAS)) {
+      recordChange({
+        resource: 'section',
+        key: 'hero',
+        field: 'content',
+        value: newContent,
+      });
+    }
+  }
 
   return (
     <section className="relative overflow-hidden py-20 md:py-28 lg:py-32 gradient-hero dark:bg-gray-950">
@@ -57,29 +87,55 @@ export default function HeroSection() {
               style={{ backgroundColor: 'var(--primary)' }}
             >
               <span className="material-symbols-outlined text-[14px]">bolt</span>
-              Tecnología de próxima generación
+              <Editable
+                as="span"
+                resource="section"
+                resourceKey="hero"
+                field="badge"
+                value={section?.badge || 'Tecnología de próxima generación'}
+              />
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight tracking-tight">
-              {renderTitle(title)}
-            </h1>
+            <Editable
+              as="h1"
+              resource="section"
+              resourceKey="hero"
+              field="title"
+              value={title}
+              className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight tracking-tight block"
+            />
 
-            <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 leading-relaxed max-w-xl">
-              {subtitle}
-            </p>
+            <Editable
+              as="p"
+              resource="section"
+              resourceKey="hero"
+              field="subtitle"
+              value={subtitle}
+              className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 leading-relaxed max-w-xl"
+            />
 
             {/* CTA buttons */}
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <a
-                href="#pricing"
+                href={editable ? undefined : '#pricing'}
+                onClick={(e) => editable && e.preventDefault()}
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white shadow-lg hover:opacity-90 transition-all hover:shadow-xl hover:-translate-y-0.5"
                 style={{ backgroundColor: 'var(--primary)' }}
               >
                 <span className="material-symbols-outlined text-[18px]">rocket_launch</span>
-                {ctaPrimary}
+                <span
+                  ref={primaryRef}
+                  contentEditable={editable}
+                  suppressContentEditableWarning
+                  onBlur={handleCtaBlur}
+                  className={editableCls}
+                >
+                  {ctaPrimary}
+                </span>
               </a>
               <a
-                href="#pricing"
+                href={editable ? undefined : '#pricing'}
+                onClick={(e) => editable && e.preventDefault()}
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow hover:bg-gray-50 dark:hover:bg-gray-700 transition-all hover:-translate-y-0.5"
               >
                 <span
@@ -88,7 +144,15 @@ export default function HeroSection() {
                 >
                   sell
                 </span>
-                {ctaSecondary}
+                <span
+                  ref={secondaryRef}
+                  contentEditable={editable}
+                  suppressContentEditableWarning
+                  onBlur={handleCtaBlur}
+                  className={editable ? 'ring-1 ring-blue-400 rounded outline-none cursor-text' : ''}
+                >
+                  {ctaSecondary}
+                </span>
               </a>
             </div>
 

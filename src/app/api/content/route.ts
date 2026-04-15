@@ -7,6 +7,9 @@ interface Section {
   title: string | null;
   subtitle: string | null;
   content: string | null;
+  badge: string | null;
+  extra_json: string | null;
+  orden: number;
 }
 
 interface Feature {
@@ -71,7 +74,7 @@ export async function GET() {
     // Sections — keyed by section_key for easy lookup
     const sectionRows = db
       .prepare(
-        `SELECT section_key, title, subtitle, content
+        `SELECT section_key, title, subtitle, content, badge, extra_json, orden
          FROM sections
          WHERE activo = 1
          ORDER BY orden`

@@ -1,6 +1,7 @@
 'use client';
 
 import { useLandingContent } from '@/lib/useLandingContent';
+import Editable from '@/components/editor/Editable';
 
 const DEFAULT_BENEFITS = [
   { id: 1, icon: 'psychology', title: 'Fácil de usar', description: 'Interfaz intuitiva diseñada para que cualquier empleado la maneje desde el primer día.' },
@@ -37,12 +38,30 @@ export default function BenefitsSection() {
             style={{ backgroundColor: 'var(--primary)' }}
           >
             <span className="material-symbols-outlined text-[14px]">thumb_up</span>
-            Por qué elegirnos
+            <Editable
+              as="span"
+              resource="section"
+              resourceKey="benefits"
+              field="badge"
+              value={section?.badge || 'Por qué elegirnos'}
+            />
           </div>
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
-            {title}
-          </h2>
-          <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">{subtitle}</p>
+          <Editable
+            as="h2"
+            resource="section"
+            resourceKey="benefits"
+            field="title"
+            value={title}
+            className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white tracking-tight block"
+          />
+          <Editable
+            as="p"
+            resource="section"
+            resourceKey="benefits"
+            field="subtitle"
+            value={subtitle}
+            className="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto block"
+          />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -65,12 +84,22 @@ export default function BenefitsSection() {
                   </span>
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1.5">
-                    {benefit.title}
-                  </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-                    {benefit.description}
-                  </p>
+                  <Editable
+                    as="h3"
+                    resource="benefit"
+                    resourceKey={String(benefit.id)}
+                    field="title"
+                    value={benefit.title}
+                    className="text-base font-semibold text-gray-900 dark:text-white mb-1.5 block"
+                  />
+                  <Editable
+                    as="p"
+                    resource="benefit"
+                    resourceKey={String(benefit.id)}
+                    field="description"
+                    value={benefit.description}
+                    className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed block"
+                  />
                 </div>
               </div>
             );

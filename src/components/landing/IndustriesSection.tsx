@@ -1,6 +1,7 @@
 'use client';
 
 import { useLandingContent } from '@/lib/useLandingContent';
+import Editable from '@/components/editor/Editable';
 
 const DEFAULT_INDUSTRIES = [
   { id: 1, icon: 'shopping_cart', name: 'Tiendas al detalle' },
@@ -38,12 +39,30 @@ export default function IndustriesSection() {
             style={{ backgroundColor: 'var(--primary)' }}
           >
             <span className="material-symbols-outlined text-[14px]">domain</span>
-            Sectores que atendemos
+            <Editable
+              as="span"
+              resource="section"
+              resourceKey="industries"
+              field="badge"
+              value={section?.badge || 'Sectores que atendemos'}
+            />
           </div>
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
-            {title}
-          </h2>
-          <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">{subtitle}</p>
+          <Editable
+            as="h2"
+            resource="section"
+            resourceKey="industries"
+            field="title"
+            value={title}
+            className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white tracking-tight block"
+          />
+          <Editable
+            as="p"
+            resource="section"
+            resourceKey="industries"
+            field="subtitle"
+            value={subtitle}
+            className="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto block"
+          />
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
@@ -65,9 +84,14 @@ export default function IndustriesSection() {
                     {industry.icon || 'storefront'}
                   </span>
                 </div>
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-                  {industry.name}
-                </h3>
+                <Editable
+                  as="h3"
+                  resource="industry"
+                  resourceKey={String(industry.id)}
+                  field="name"
+                  value={industry.name}
+                  className="text-sm font-semibold text-gray-900 dark:text-white block"
+                />
               </div>
             );
           })}

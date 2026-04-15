@@ -1,6 +1,7 @@
 'use client';
 
 import { useLandingContent } from '@/lib/useLandingContent';
+import Editable from '@/components/editor/Editable';
 
 const DEFAULT_FEATURES = [
   { id: 1, icon: 'bolt', title: 'Ventas Rápidas', description: 'Procesa ventas en segundos con nuestra interfaz intuitiva.' },
@@ -29,12 +30,30 @@ export default function FeaturesSection() {
             style={{ backgroundColor: 'var(--primary)' }}
           >
             <span className="material-symbols-outlined text-[14px]">star</span>
-            Características principales
+            <Editable
+              as="span"
+              resource="section"
+              resourceKey="features"
+              field="badge"
+              value={section?.badge || 'Características principales'}
+            />
           </div>
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
-            {title}
-          </h2>
-          <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">{subtitle}</p>
+          <Editable
+            as="h2"
+            resource="section"
+            resourceKey="features"
+            field="title"
+            value={title}
+            className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white tracking-tight block"
+          />
+          <Editable
+            as="p"
+            resource="section"
+            resourceKey="features"
+            field="subtitle"
+            value={subtitle}
+            className="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto block"
+          />
         </div>
 
         {/* Features grid */}
@@ -55,12 +74,22 @@ export default function FeaturesSection() {
                   {feature.icon || 'bolt'}
                 </span>
               </div>
-              <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">
-                {feature.title}
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-                {feature.description}
-              </p>
+              <Editable
+                as="h3"
+                resource="feature"
+                resourceKey={String(feature.id)}
+                field="title"
+                value={feature.title}
+                className="text-base font-semibold text-gray-900 dark:text-white mb-2 block"
+              />
+              <Editable
+                as="p"
+                resource="feature"
+                resourceKey={String(feature.id)}
+                field="description"
+                value={feature.description}
+                className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed block"
+              />
             </div>
           ))}
         </div>

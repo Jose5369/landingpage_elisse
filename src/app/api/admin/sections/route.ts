@@ -8,6 +8,8 @@ interface Section {
   title: string;
   subtitle: string;
   content: string;
+  badge: string | null;
+  extra_json: string | null;
   activo: number;
   orden: number;
 }
@@ -41,11 +43,13 @@ export async function PUT(request: NextRequest) {
     const db = getDb();
     const stmt = db.prepare(
       `UPDATE sections SET
-        title    = COALESCE(?, title),
-        subtitle = COALESCE(?, subtitle),
-        content  = COALESCE(?, content),
-        activo   = COALESCE(?, activo),
-        orden    = COALESCE(?, orden)
+        title      = COALESCE(?, title),
+        subtitle   = COALESCE(?, subtitle),
+        content    = COALESCE(?, content),
+        badge      = COALESCE(?, badge),
+        extra_json = COALESCE(?, extra_json),
+        activo     = COALESCE(?, activo),
+        orden      = COALESCE(?, orden)
       WHERE section_key = ?`
     );
 
@@ -56,6 +60,8 @@ export async function PUT(request: NextRequest) {
           s.title ?? null,
           s.subtitle ?? null,
           s.content ?? null,
+          s.badge ?? null,
+          s.extra_json ?? null,
           s.activo ?? null,
           s.orden ?? null,
           s.section_key

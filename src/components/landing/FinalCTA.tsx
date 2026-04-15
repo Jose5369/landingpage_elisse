@@ -1,6 +1,7 @@
 'use client';
 
 import { useSection } from '@/lib/useLandingContent';
+import Editable from '@/components/editor/Editable';
 
 export default function FinalCTA() {
   const section = useSection('final_cta');
@@ -24,13 +25,23 @@ export default function FinalCTA() {
           </span>
         </div>
 
-        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 dark:text-white leading-tight tracking-tight mb-5">
-          {title}
-        </h2>
+        <Editable
+          as="h2"
+          resource="section"
+          resourceKey="final_cta"
+          field="title"
+          value={title}
+          className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 dark:text-white leading-tight tracking-tight mb-5 block"
+        />
 
-        <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed max-w-2xl mx-auto mb-8">
-          {subtitle}
-        </p>
+        <Editable
+          as="p"
+          resource="section"
+          resourceKey="final_cta"
+          field="subtitle"
+          value={subtitle}
+          className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed max-w-2xl mx-auto mb-8 block"
+        />
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4 sm:gap-8 mb-10 max-w-xl mx-auto">

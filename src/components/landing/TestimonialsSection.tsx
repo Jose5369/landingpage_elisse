@@ -1,6 +1,7 @@
 'use client';
 
 import { useSection } from '@/lib/useLandingContent';
+import Editable from '@/components/editor/Editable';
 
 const testimonials = [
   {
@@ -72,14 +73,30 @@ export default function TestimonialsSection() {
             <span className="material-symbols-outlined text-[14px]">
               format_quote
             </span>
-            Testimonios
+            <Editable
+              as="span"
+              resource="section"
+              resourceKey="testimonials"
+              field="badge"
+              value={section?.badge || 'Testimonios'}
+            />
           </div>
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
-            {title}
-          </h2>
-          <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            {subtitle}
-          </p>
+          <Editable
+            as="h2"
+            resource="section"
+            resourceKey="testimonials"
+            field="title"
+            value={title}
+            className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white tracking-tight block"
+          />
+          <Editable
+            as="p"
+            resource="section"
+            resourceKey="testimonials"
+            field="subtitle"
+            value={subtitle}
+            className="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto block"
+          />
         </div>
 
         {/* Testimonials grid */}

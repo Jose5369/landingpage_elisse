@@ -1,6 +1,7 @@
 'use client';
 
 import { useLandingContent } from '@/lib/useLandingContent';
+import Editable from '@/components/editor/Editable';
 
 export default function WhatsAppCTA() {
   const content = useLandingContent();
@@ -40,16 +41,32 @@ export default function WhatsAppCTA() {
           <span className="material-symbols-outlined text-[14px] filled">
             support_agent
           </span>
-          Estamos aquí para ayudarte
+          <Editable
+            as="span"
+            resource="section"
+            resourceKey="whatsapp_cta"
+            field="badge"
+            value={section?.badge || 'Estamos aquí para ayudarte'}
+          />
         </div>
 
-        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight tracking-tight mb-5">
-          {title}
-        </h2>
+        <Editable
+          as="h2"
+          resource="section"
+          resourceKey="whatsapp_cta"
+          field="title"
+          value={title}
+          className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight tracking-tight mb-5 block"
+        />
 
-        <p className="text-lg text-white/80 leading-relaxed max-w-2xl mx-auto mb-8">
-          {subtitle}
-        </p>
+        <Editable
+          as="p"
+          resource="section"
+          resourceKey="whatsapp_cta"
+          field="subtitle"
+          value={subtitle}
+          className="text-lg text-white/80 leading-relaxed max-w-2xl mx-auto mb-8 block"
+        />
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <a

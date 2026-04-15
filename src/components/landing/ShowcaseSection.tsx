@@ -1,34 +1,89 @@
 'use client';
 
+import { useRef } from 'react';
 import { useSection } from '@/lib/useLandingContent';
+import Editable from '@/components/editor/Editable';
+import { useEditMode } from '@/lib/editMode';
 
-const highlights = [
+interface Highlight {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+const DEFAULT_HIGHLIGHTS: Highlight[] = [
   {
-    icon: "dashboard",
-    title: "Dashboard en tiempo real",
+    icon: 'dashboard',
+    title: 'Dashboard en tiempo real',
     description:
-      "Visualiza ventas, inventario y rendimiento de tu negocio con gráficas actualizadas al instante.",
+      'Visualiza ventas, inventario y rendimiento de tu negocio con gráficas actualizadas al instante.',
   },
   {
-    icon: "qr_code_scanner",
-    title: "Escaneo rápido de productos",
+    icon: 'qr_code_scanner',
+    title: 'Escaneo rápido de productos',
     description:
-      "Agrega productos a la venta con un escaneo de código de barras. Rápido, preciso y sin errores.",
+      'Agrega productos a la venta con un escaneo de código de barras. Rápido, preciso y sin errores.',
   },
   {
-    icon: "cloud_sync",
-    title: "Sincronización en la nube",
+    icon: 'cloud_sync',
+    title: 'Sincronización en la nube',
     description:
-      "Tus datos siempre respaldados y disponibles en todos tus dispositivos sin interrupciones.",
+      'Tus datos siempre respaldados y disponibles en todos tus dispositivos sin interrupciones.',
   },
 ];
 
+function parseHighlights(extraJson: string | null | undefined): Highlight[] {
+  if (!extraJson) return DEFAULT_HIGHLIGHTS;
+  try {
+    const parsed = JSON.parse(extraJson);
+    if (Array.isArray(parsed?.highlights)) return parsed.highlights;
+  } catch {
+    // fall through
+  }
+  return DEFAULT_HIGHLIGHTS;
+}
+
 export default function ShowcaseSection() {
   const section = useSection('showcase');
+  const { isAdmin, isEditMode, recordChange, pendingChanges } = useEditMode();
   const title = section?.title || 'Tu negocio siempre bajo control';
   const subtitle =
     section?.subtitle ||
     'Un dashboard completo que te da visibilidad total de tu operación, desde el punto de venta hasta los reportes ejecutivos.';
+
+  // Pending edit overrides stored value
+  const pendingExtra = pendingChanges.find(
+    (c) => c.resource === 'section' && c.key === 'showcase' && c.field === 'extra_json'
+  )?.value;
+  const highlights = parseHighlights(pendingExtra ?? section?.extra_json);
+
+  const editable = isAdmin && isEditMode;
+  const highlightRefs = useRef<Array<{ title: HTMLElement | null; description: HTMLElement | null }>>([]);
+
+  function handleHighlightBlur() {
+    const updated = highlights.map((h, i) => ({
+      icon: h.icon,
+      title: highlightRefs.current[i]?.title?.innerText.trim() || h.title,
+      description: highlightRefs.current[i]?.description?.innerText.trim() || h.description,
+    }));
+    const newExtra = JSON.stringify({ highlights: updated });
+    if (newExtra !== (section?.extra_json ?? JSON.stringify({ highlights: DEFAULT_HIGHLIGHTS }))) {
+      recordChange({
+        resource: 'section',
+        key: 'showcase',
+        field: 'extra_json',
+        value: newExtra,
+      });
+    }
+  }
+
+  function setRef(idx: number, kind: 'title' | 'description', el: HTMLElement | null) {
+    if (!highlightRefs.current[idx]) {
+      highlightRefs.current[idx] = { title: null, description: null };
+    }
+    highlightRefs.current[idx][kind] = el;
+  }
+
   return (
     <section
       id="showcase"
@@ -189,20 +244,36 @@ export default function ShowcaseSection() {
                 <span className="material-symbols-outlined text-[14px]">
                   visibility
                 </span>
-                Potente y visual
+                <Editable
+                  as="span"
+                  resource="section"
+                  resourceKey="showcase"
+                  field="badge"
+                  value={section?.badge || 'Potente y visual'}
+                />
               </div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-white leading-tight tracking-tight">
-                {title}
-              </h2>
-              <p className="mt-4 text-lg text-gray-300 leading-relaxed">
-                {subtitle}
-              </p>
+              <Editable
+                as="h2"
+                resource="section"
+                resourceKey="showcase"
+                field="title"
+                value={title}
+                className="text-3xl sm:text-4xl font-bold text-white leading-tight tracking-tight block"
+              />
+              <Editable
+                as="p"
+                resource="section"
+                resourceKey="showcase"
+                field="subtitle"
+                value={subtitle}
+                className="mt-4 text-lg text-gray-300 leading-relaxed block"
+              />
             </div>
 
             <div className="flex flex-col gap-4">
-              {highlights.map((item) => (
+              {highlights.map((item, idx) => (
                 <div
-                  key={item.title}
+                  key={idx}
                   className="flex gap-4 p-4 rounded-xl bg-gray-800/50 border border-gray-700/50 hover:border-gray-600 transition-colors"
                 >
                   <div
@@ -217,10 +288,22 @@ export default function ShowcaseSection() {
                     </span>
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-white mb-1">
+                    <h3
+                      ref={(el) => setRef(idx, 'title', el)}
+                      contentEditable={editable}
+                      suppressContentEditableWarning
+                      onBlur={handleHighlightBlur}
+                      className={`text-sm font-semibold text-white mb-1 outline-none ${editable ? 'ring-1 ring-blue-400/60 rounded px-0.5 cursor-text' : ''}`}
+                    >
                       {item.title}
                     </h3>
-                    <p className="text-sm text-gray-400 leading-relaxed">
+                    <p
+                      ref={(el) => setRef(idx, 'description', el)}
+                      contentEditable={editable}
+                      suppressContentEditableWarning
+                      onBlur={handleHighlightBlur}
+                      className={`text-sm text-gray-400 leading-relaxed outline-none ${editable ? 'ring-1 ring-blue-400/60 rounded px-0.5 cursor-text' : ''}`}
+                    >
                       {item.description}
                     </p>
                   </div>

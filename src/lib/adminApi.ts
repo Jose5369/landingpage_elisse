@@ -28,6 +28,18 @@ export async function adminFetch<T = unknown>(
 
   const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
 
+  if (res.status === 401) {
+    // Stale/invalid token — clear and force login
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('admin_token');
+      // Reload to show the login form; avoid infinite loop by checking current path
+      if (window.location.pathname.startsWith('/admin')) {
+        window.location.href = '/admin';
+      }
+    }
+    throw new ApiError('Sesión expirada', 401);
+  }
+
   if (!res.ok) {
     let message = `HTTP ${res.status}`;
     try {

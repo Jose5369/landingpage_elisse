@@ -130,6 +130,19 @@ function initializeTables(db: Database.Database): void {
     }
   }
 
+  // sections: add new columns for badges and extra JSON data
+  const sectionColumns: [string, string][] = [
+    ['badge',      'TEXT'],
+    ['extra_json', 'TEXT'],
+  ];
+  for (const [col, def] of sectionColumns) {
+    try {
+      db.exec(`ALTER TABLE sections ADD COLUMN ${col} ${def}`);
+    } catch {
+      // Column already exists – that's fine
+    }
+  }
+
   seedDefaultData(db);
   seedRoles(db);
 }
@@ -224,7 +237,7 @@ function seedDefaultData(db: Database.Database): void {
     ['whatsapp_number',      '',                                                'contact'],
     ['whatsapp_active',      '1',                                               'contact'],
     ['footer_description',   'La plataforma l\u00EDder para gesti\u00F3n de ventas, inventario y facturaci\u00F3n para peque\u00F1as y medianas empresas.', 'footer'],
-    ['system_url',           'https://app.elisesystem.com',                    'integrations'],
+    ['system_url',           'https://pos.elisesystem.com',                    'integrations'],
   ];
 
   const seedSettings = db.transaction(() => {

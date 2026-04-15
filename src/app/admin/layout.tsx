@@ -583,8 +583,28 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     const stored = localStorage.getItem('admin_token');
-    setToken(stored);
-    setMounted(true);
+
+    // Validate stored token against /api/admin/me. If invalid, treat as no session.
+    if (stored) {
+      fetch('/api/admin/me', {
+        headers: { Authorization: `Bearer ${stored}` },
+      })
+        .then((r) => {
+          if (r.ok) {
+            setToken(stored);
+          } else {
+            localStorage.removeItem('admin_token');
+            setToken(null);
+          }
+        })
+        .catch(() => {
+          setToken(null);
+        })
+        .finally(() => setMounted(true));
+    } else {
+      setMounted(true);
+    }
+
     fetch('/api/settings')
       .then((r) => r.json())
       .then((data: Record<string, string>) => {
