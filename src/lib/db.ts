@@ -349,13 +349,16 @@ function seedDefaultData(db: Database.Database): void {
       'INSERT INTO sections (section_key, title, subtitle, content, activo, orden) VALUES (?, ?, ?, ?, 1, ?)'
     );
     const sections: [string, string, string, string, number][] = [
-      ['hero',         'El Sistema POS que Impulsa tu Negocio', 'Todo lo que necesitas para gestionar ventas, inventario y clientes en una sola plataforma.', '', 1],
+      ['hero',         'El Sistema POS que Impulsa tu Negocio', 'Todo lo que necesitas para gestionar ventas, inventario y clientes en una sola plataforma.', 'Probar 15 d\u00EDas gratis|Ver Precios', 1],
       ['trust_bar',    'Con la confianza de cientos de empresas', '', '', 2],
-      ['showcase',     'Dise\u00F1ado para la Velocidad y la Claridad', 'Cada pantalla pensada para que t\u00FA y tu equipo trabajen sin fricciones.', '', 3],
-      ['whatsapp_cta', '\u00BFTienes preguntas? Hablemos por WhatsApp', 'Nuestro equipo est\u00E1 listo para ayudarte a elegir el plan ideal para tu negocio.', '', 4],
-      ['pricing',      'Planes y Precios', 'Elige el plan que mejor se adapta a tu negocio. Sin sorpresas, sin letra peque\u00F1a.', '', 5],
-      ['testimonials', 'Lo que dicen nuestros clientes', 'Negocios como el tuyo ya est\u00E1n creciendo con ELISE SYSTEM.', '', 6],
-      ['final_cta',    '\u00BFListo para transformar tu negocio?', '\u00DAnete a cientos de empresas que ya conf\u00EDan en ELISE SYSTEM para gestionar sus operaciones.', '', 7],
+      ['features',     'Funcionalidades dise\u00F1adas para tu negocio', 'Cada herramienta fue creada para resolver los problemas reales de negocios como el tuyo.', '', 3],
+      ['showcase',     'Dise\u00F1ado para la Velocidad y la Claridad', 'Cada pantalla pensada para que t\u00FA y tu equipo trabajen sin fricciones.', '', 4],
+      ['benefits',     'Beneficios que transforman tu operaci\u00F3n', 'M\u00E1s que un software: una ventaja competitiva para tu negocio.', '', 5],
+      ['whatsapp_cta', '\u00BFTienes preguntas? Hablemos por WhatsApp', 'Nuestro equipo est\u00E1 listo para ayudarte a elegir el plan ideal para tu negocio.', '', 6],
+      ['industries',   'Perfecto para cualquier tipo de negocio', 'Desde tiendas peque\u00F1as hasta cadenas con m\u00FAltiples sucursales.', '', 7],
+      ['pricing',      'Planes y Precios', 'Elige el plan que mejor se adapta a tu negocio. Sin sorpresas, sin letra peque\u00F1a.', '', 8],
+      ['testimonials', 'Lo que dicen nuestros clientes', 'Negocios como el tuyo ya est\u00E1n creciendo con ELISE SYSTEM.', '', 9],
+      ['final_cta',    '\u00BFListo para transformar tu negocio?', '\u00DAnete a cientos de empresas que ya conf\u00EDan en ELISE SYSTEM para gestionar sus operaciones.', '', 10],
     ];
     const seedSections = db.transaction(() => {
       for (const [section_key, title, subtitle, content, orden] of sections) {

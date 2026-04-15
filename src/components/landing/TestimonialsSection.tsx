@@ -1,3 +1,7 @@
+'use client';
+
+import { useSection } from '@/lib/useLandingContent';
+
 const testimonials = [
   {
     name: "María García",
@@ -48,6 +52,11 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 export default function TestimonialsSection() {
+  const section = useSection('testimonials');
+  const title = section?.title || 'Lo que dicen nuestros clientes';
+  const subtitle =
+    section?.subtitle ||
+    'Cientos de negocios ya confían en ELISE SYSTEM para gestionar su operación diaria.';
   return (
     <section
       id="testimonials"
@@ -66,12 +75,10 @@ export default function TestimonialsSection() {
             Testimonios
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
-            Lo que dicen nuestros{" "}
-            <span style={{ color: "var(--primary)" }}>clientes</span>
+            {title}
           </h2>
           <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Cientos de negocios en la República Dominicana ya confían en ELISE
-            SYSTEM para gestionar su operación diaria.
+            {subtitle}
           </p>
         </div>
 

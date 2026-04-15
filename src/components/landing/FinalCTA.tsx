@@ -1,4 +1,13 @@
+'use client';
+
+import { useSection } from '@/lib/useLandingContent';
+
 export default function FinalCTA() {
+  const section = useSection('final_cta');
+  const title = section?.title || 'Empieza hoy y transforma tu negocio con ELISE SYSTEM';
+  const subtitle =
+    section?.subtitle ||
+    'Únete a cientos de negocios que ya usan ELISE SYSTEM para crecer, vender más y gestionar mejor. Sin complicaciones, sin contratos largos.';
   return (
     <section className="py-20 md:py-28 bg-white dark:bg-gray-900">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -16,14 +25,11 @@ export default function FinalCTA() {
         </div>
 
         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 dark:text-white leading-tight tracking-tight mb-5">
-          Empieza hoy y transforma tu negocio con{" "}
-          <span style={{ color: "var(--primary)" }}>ELISE SYSTEM</span>
+          {title}
         </h2>
 
         <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed max-w-2xl mx-auto mb-8">
-          Únete a cientos de negocios que ya usan ELISE SYSTEM para crecer,
-          vender más y gestionar mejor. Sin complicaciones, sin contratos
-          largos.
+          {subtitle}
         </p>
 
         {/* Stats */}

@@ -1,9 +1,22 @@
+'use client';
+
+import { useLandingContent } from '@/lib/useLandingContent';
+
 export default function WhatsAppCTA() {
-  const whatsappNumber = "18095551234";
+  const content = useLandingContent();
+  const section = content?.sections?.whatsapp_cta;
+
+  const title = section?.title || '¿Listo para transformar tu negocio?';
+  const subtitle =
+    section?.subtitle ||
+    'Habla directamente con un especialista de ELISE SYSTEM. Te explicamos cómo nuestra plataforma puede adaptarse a las necesidades exactas de tu negocio.';
+
+  const whatsappNumber = content?.settings?.whatsapp_number || '18095551234';
   const whatsappMessage = encodeURIComponent(
-    "Hola, me interesa conocer más sobre ELISE SYSTEM. ¿Pueden darme más información?"
+    content?.settings?.whatsapp_message ||
+      'Hola, me interesa conocer más sobre ELISE SYSTEM. ¿Pueden darme más información?'
   );
-  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
+  const whatsappUrl = `https://wa.me/${whatsappNumber.replace(/\D/g, '')}?text=${whatsappMessage}`;
 
   return (
     <section
@@ -31,13 +44,11 @@ export default function WhatsAppCTA() {
         </div>
 
         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight tracking-tight mb-5">
-          ¿Listo para transformar tu negocio?
+          {title}
         </h2>
 
         <p className="text-lg text-white/80 leading-relaxed max-w-2xl mx-auto mb-8">
-          Habla directamente con un especialista de ELISE SYSTEM. Te explicamos
-          cómo nuestra plataforma puede adaptarse a las necesidades exactas de
-          tu negocio.
+          {subtitle}
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">

@@ -1,3 +1,7 @@
+'use client';
+
+import { useSection } from '@/lib/useLandingContent';
+
 const highlights = [
   {
     icon: "dashboard",
@@ -20,6 +24,11 @@ const highlights = [
 ];
 
 export default function ShowcaseSection() {
+  const section = useSection('showcase');
+  const title = section?.title || 'Tu negocio siempre bajo control';
+  const subtitle =
+    section?.subtitle ||
+    'Un dashboard completo que te da visibilidad total de tu operación, desde el punto de venta hasta los reportes ejecutivos.';
   return (
     <section
       id="showcase"
@@ -183,12 +192,10 @@ export default function ShowcaseSection() {
                 Potente y visual
               </div>
               <h2 className="text-3xl sm:text-4xl font-bold text-white leading-tight tracking-tight">
-                Tu negocio siempre{" "}
-                <span style={{ color: "var(--primary)" }}>bajo control</span>
+                {title}
               </h2>
               <p className="mt-4 text-lg text-gray-300 leading-relaxed">
-                Un dashboard completo que te da visibilidad total de tu operación,
-                desde el punto de venta hasta los reportes ejecutivos.
+                {subtitle}
               </p>
             </div>
 
